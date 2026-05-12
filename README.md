@@ -1,8 +1,6 @@
 # cloud-automata-lab
 
-A Python port of the **Cloud Automata Lab** frontend specification. Design Turing
-machines, model computational systems, and dispatch Wolfram Language code to a
-WolframCloud endpoint — all from regular Python.
+Design Turing machines, model computational systems, and write language protocols.
 
 This is the library form of `src/CloudAutomataLabFrontend.md`. The React app
 keeps the GUI; this package keeps the data model, the simulator, the code
