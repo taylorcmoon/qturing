@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+cloud_automata_lab/__init__.py
+cloud_automata_lab/ca.py
+cloud_automata_lab/cloud.py
+cloud_automata_lab/exporters.py
+cloud_automata_lab/presets.py
+cloud_automata_lab/turing.py
+cloud_automata_lab/types.py
+cloud_automata_lab/wolfram.py
+cloud_automata_lab.egg-info/PKG-INFO
+cloud_automata_lab.egg-info/SOURCES.txt
+cloud_automata_lab.egg-info/dependency_links.txt
+cloud_automata_lab.egg-info/requires.txt
+cloud_automata_lab.egg-info/top_level.txt
