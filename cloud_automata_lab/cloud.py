@@ -1,3 +1,12 @@
+"""cloud.py — WolframCloud HTTP client with mock mode.
+
+``execute()`` sends a ``CloudRequest`` to a WolframCloud endpoint and returns
+a ``CloudResponse``. Set ``CloudSettings.mode`` to ``"mock"`` during
+development to get realistic stub responses without a live endpoint.
+
+Author:  Taylor Moon <taylorcmoon>
+License: MIT
+"""
 from __future__ import annotations
 
 import json

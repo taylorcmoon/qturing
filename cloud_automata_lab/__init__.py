@@ -1,14 +1,12 @@
 """Cloud Automata Lab — design Turing machines and model computational systems.
 
-Python port of the WolframCloud-style frontend originally specified in
-``CloudAutomataLabFrontend.md``. Provides:
+Provides dataclass-based machine specs, a local simulator, Wolfram Language
+code generation, multi-language exporters (Python / JavaScript / Go / C / Wolfram),
+a WolframCloud client with mock mode, and workspace presets.
 
-- dataclass-based machine specs (``TuringMachineSpec``, ``Transition``)
-- a local simulator (``simulate``, ``trace``)
-- Wolfram Language code generation (``to_wolfram``)
-- multi-language exporters (Python / JavaScript / Go / Wolfram)
-- a WolframCloud client with a mock mode (``execute``)
-- workspace commands and modeling presets
+Author:  Taylor Moon <taylorcmoon>
+License: MIT
+Source:  https://github.com/taylorcmoon/Quasilink
 """
 
 from .cloud import execute

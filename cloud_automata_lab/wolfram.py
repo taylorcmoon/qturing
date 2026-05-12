@@ -1,3 +1,11 @@
+"""wolfram.py — Wolfram Language code generation for Turing machines.
+
+``to_wolfram()`` renders a ``TuringMachineSpec`` as a Wolfram Language
+association literal ready for use in a Wolfram notebook or WolframCloud deployment.
+
+Author:  Taylor Moon <taylorcmoon>
+License: MIT
+"""
 from __future__ import annotations
 
 from .types import TuringMachineSpec

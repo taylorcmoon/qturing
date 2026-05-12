@@ -1,3 +1,13 @@
+"""exporters.py — multi-language code generation for Turing machines.
+
+``export(machine, language)`` renders a ``TuringMachineSpec`` as a
+self-contained, runnable program in the target language.
+
+Supported targets: ``wolfram``, ``python``, ``javascript``, ``go``, ``c``.
+
+Author:  Taylor Moon <taylorcmoon>
+License: MIT
+"""
 from __future__ import annotations
 
 import json

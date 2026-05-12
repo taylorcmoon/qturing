@@ -1,3 +1,13 @@
+"""presets.py — built-in machines, workspace commands, and modeling presets.
+
+Exports:
+- ``STARTER_MACHINE`` — a binary incrementer to use as a starting point
+- ``WORKSPACE_COMMANDS`` — template Wolfram Language snippets
+- ``MODELING_PRESETS`` — categorised research starting points
+
+Author:  Taylor Moon <taylorcmoon>
+License: MIT
+"""
 from __future__ import annotations
 
 from .types import ModelingPreset, Transition, TuringMachineSpec, WorkspaceCommand

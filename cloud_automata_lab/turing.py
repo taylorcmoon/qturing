@@ -1,3 +1,12 @@
+"""turing.py — local Turing machine simulator.
+
+Provides ``simulate()`` for a full run and ``trace()`` for step-by-step
+iteration. Both mirror the semantics of the exported multi-language runners
+so local results are directly comparable to code produced by ``exporters``.
+
+Author:  Taylor Moon <taylorcmoon>
+License: MIT
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

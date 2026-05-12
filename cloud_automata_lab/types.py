@@ -1,3 +1,14 @@
+"""types.py — shared dataclasses and type aliases for Cloud Automata Lab.
+
+Defines the full type hierarchy used across the package:
+- Turing machine specs (``TuringMachineSpec``, ``Transition``, ``TapeSnapshot``)
+- Cloud client types (``CloudSettings``, ``CloudRequest``, ``CloudResponse``)
+- Cellular automaton configs and results (1D and 2D)
+- Wolfram expression and export types
+
+Author:  Taylor Moon <taylorcmoon>
+License: MIT
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
