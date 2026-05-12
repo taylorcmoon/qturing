@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wolfram Cloud Studio</title>
+<style>
+:root {
+  --bg:#0d0d12; --surface:#17171f; --surface2:#20202c; --surface3:#2a2a38;
+  --accent:#cc5500; --accent-h:#e8661a; --text:#e2e2ef; --muted:#6e6e84;
+  --border:#2c2c3a; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+}
+[data-theme="light"] {
+  --bg:#f4f4f9; --surface:#fff; --surface2:#eeeef5; --surface3:#e4e4ee;
+  --text:#18182a; --muted:#70708a; --border:#d4d4e2;
+  --ok:#16a34a; --warn:#d97706; --err:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.6;
+     background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* header */
+header{display:flex;align-items:center;gap:12px;height:52px;padding:0 20px;
+       background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.logo span{color:var(--accent)}
+.badge{font-size:11px;color:var(--muted);background:var(--surface3);padding:2px 8px;border-radius:99px}
+.spacer{flex:1}
+.hbtn{cursor:pointer;background:var(--surface3);border:1px solid var(--border);color:var(--text);
+      padding:5px 12px;border-radius:6px;font-size:12px;transition:background .15s}
+.hbtn:hover{background:var(--surface2)}
+
+/* shell */
+.shell{display:flex;flex:1;overflow:hidden}
+
+/* sidebar */
+nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;padding:12px 8px;gap:2px;overflow-y:auto}
+.nav-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+           color:var(--muted);padding:8px 10px 4px}
+.nb{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;
+    background:transparent;color:var(--text);font-size:13px;text-align:left;
+    border-radius:6px;cursor:pointer;transition:background .12s,color .12s}
+.nb:hover{background:var(--surface3)}
+.nb.active{background:rgba(204,85,0,.15);color:var(--accent-h);font-weight:500}
+.nb .ic{font-size:15px;width:18px;text-align:center}
+
+/* content */
+main{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
+.card h2{font-size:16px;font-weight:600;margin-bottom:14px}
+
+/* stats */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+.stat .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.stat .val{font-size:15px;font-weight:700;color:var(--accent-h);word-break:break-all}
+
+/* inputs */
+textarea,input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;
+  padding:10px 12px;resize:vertical;outline:none;transition:border-color .15s}
+textarea:focus,input[type=text]:focus{border-color:var(--accent)}
+
+/* buttons */
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.btn{padding:8px 16px;border:1px solid var(--border);border-radius:6px;font-size:13px;
+     cursor:pointer;background:var(--surface3);color:var(--text);transition:background .12s}
+.btn:hover{background:var(--surface2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.p:hover{background:var(--accent-h)}
+
+/* output */
+.out{margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+     padding:12px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.7;white-space:pre-wrap;
+     word-break:break-all;min-height:60px;max-height:360px;overflow-y:auto;color:var(--text)}
+.out.ok{border-color:var(--ok)}
+.out.err{border-color:var(--err);color:var(--err)}
+
+/* context */
+.plist{display:flex;flex-direction:column;gap:8px}
+.pi{background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+    padding:10px 14px;display:flex;align-items:center;gap:12px}
+.pi .pid{font-family:monospace;font-size:11px;color:var(--muted);width:50px;flex-shrink:0}
+.pi .kbadge{font-size:10px;font-weight:600;background:rgba(204,85,0,.15);color:var(--accent-h);
+            padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pi .cmd{font-family:monospace;font-size:11px;color:var(--muted);overflow:hidden;
+         text-overflow:ellipsis;white-space:nowrap}
+
+/* docs */
+.dtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.dtab{padding:5px 12px;border:1px solid var(--border);border-radius:20px;
+      background:var(--surface2);color:var(--muted);font-size:12px;cursor:pointer}
+.dtab.active{background:rgba(204,85,0,.2);color:var(--accent-h);border-color:var(--accent)}
+.dsec{display:none}
+.dsec.active{display:block}
+.dsec h4{font-size:13px;font-weight:600;margin:14px 0 6px;color:var(--text)}
+.dsec p,.dsec li{font-size:13px;color:var(--muted);line-height:1.7}
+.dsec ul{padding-left:18px}
+.dsec code{font-family:monospace;background:var(--surface3);padding:1px 5px;
+           border-radius:4px;font-size:12px;color:var(--accent-h)}
+
+/* settings */
+.srow{display:flex;align-items:center;justify-content:space-between;
+      padding:12px 0;border-bottom:1px solid var(--border);gap:12px}
+.srow:last-child{border-bottom:none}
+.slbl{font-size:13px;color:var(--text)}
+.sdesc{font-size:11px;color:var(--muted);margin-top:2px}
+.srow input[type=text]{width:220px;padding:6px 10px;font-family:inherit}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.ts{position:absolute;inset:0;background:var(--surface3);border:1px solid var(--border);
+    border-radius:99px;cursor:pointer;transition:background .2s}
+.ts:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;
+           background:var(--muted);border-radius:50%;transition:transform .2s,background .2s}
+.toggle input:checked+.ts{background:var(--accent);border-color:var(--accent)}
+.toggle input:checked+.ts:before{transform:translateX(18px);background:#fff}
+
+/* history */
+.hlist{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+.hi{background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+    padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.hi:hover{border-color:var(--accent)}
+.ht{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;flex-shrink:0;width:48px}
+.hx{font-family:monospace;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* empty */
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:32px}
+
+/* connect banner */
+.banner{background:rgba(204,85,0,.1);border:1px solid rgba(204,85,0,.3);
+        border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text);
+        display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.banner .burl{font-family:monospace;font-size:12px;flex:1;min-width:180px;
+              background:var(--surface2);border:1px solid var(--border);
+              border-radius:5px;padding:6px 10px;color:var(--text)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.online{background:var(--ok)}
+
+/* tab panels */
+.tp{display:none}
+.tp.active{display:flex;flex-direction:column;gap:20px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Wolfram<span>|</span>Cloud Studio</div>
+  <span class="badge">v1.0.0</span>
+  <div class="spacer"></div>
+  <button class="hbtn" id="themeBtn">☀ Light</button>
+</header>
+
+<div class="shell">
+<nav>
+  <div class="nav-label">Main</div>
+  <button class="nb active" data-t="overview"><span class="ic">⬡</span>Overview</button>
+  <button class="nb" data-t="evaluate"><span class="ic">≫</span>Evaluate</button>
+  <button class="nb" data-t="alpha"><span class="ic">α</span>Wolfram|Alpha</button>
+  <button class="nb" data-t="context"><span class="ic">⟳</span>Context</button>
+  <div class="nav-label" style="margin-top:8px">Other</div>
+  <button class="nb" data-t="history"><span class="ic">☰</span>History</button>
+  <button class="nb" data-t="docs"><span class="ic">?</span>Docs</button>
+  <button class="nb" data-t="settings"><span class="ic">⚙</span>Settings</button>
+</nav>
+
+<main id="main">
+
+<!-- ── Overview ── -->
+<div class="tp active" id="tab-overview">
+  <div class="card">
+    <h2>System Overview</h2>
+    <div class="grid" id="stat-grid"></div>
+  </div>
+  <div class="card" id="connect-card">
+    <h2>Backend Connection</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+      Paste your Wolfram Cloud deployment URL to enable live evaluation and Alpha queries.
+      Leave blank to use this UI in offline/demo mode.
+    </p>
+    <div class="banner">
+      <div class="dot" id="conn-dot"></div>
+      <span id="conn-status" style="font-size:12px;color:var(--muted)">Not connected</span>
+      <input class="burl" id="backend-url" type="text" placeholder="https://www.wolframcloud.com/obj/your-username/wolfram-cloud-studio">
+      <button class="btn p" onclick="connectBackend()">Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Evaluate ── -->
+<div class="tp" id="tab-evaluate">
+  <div class="card">
+    <h2>Wolfram Language Evaluator</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+      Enter a WL expression. <kbd style="background:var(--surface3);padding:1px 6px;border-radius:4px;font-size:11px">Ctrl+Enter</kbd> to run.
+      Requires backend connection for live evaluation — demo mode shows mock output.
+    </p>
+    <textarea id="eval-input" rows="5" placeholder="Prime[100]&#10;Table[i^2, {i, 10}]&#10;Solve[x^2 - 5x + 6 == 0, x]"></textarea>
+    <div class="row">
+      <button class="btn p" onclick="runEval()">Run ▶</button>
+      <button class="btn" onclick="document.getElementById('eval-input').value=''">Clear</button>
+    </div>
+    <div id="eval-out" class="out">Output will appear here…</div>
+  </div>
+</div>
+
+<!-- ── Alpha ── -->
+<div class="tp" id="tab-alpha">
+  <div class="card">
+    <h2>Wolfram|Alpha Query</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+      Ask anything in plain English. <kbd style="background:var(--surface3);padding:1px 6px;border-radius:4px;font-size:11px">Ctrl+Enter</kbd> to query.
+    </p>
+    <input type="text" id="alpha-input" placeholder="distance from Earth to Mars  ·  integral of sin(x)^2  ·  GDP of Japan 2023">
+    <div class="row">
+      <button class="btn p" onclick="runAlpha()">Ask α</button>
+      <button class="btn" onclick="document.getElementById('alpha-input').value=''">Clear</button>
+    </div>
+    <div id="alpha-out" class="out">Answer will appear here…</div>
+  </div>
+</div>
+
+<!-- ── Context ── -->
+<div class="tp" id="tab-context">
+  <div class="card">
+    <h2>Live Context</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
+      Development processes detected on the backend host. Requires backend connection.
+    </p>
+    <button class="btn" onclick="loadContext()" style="margin-bottom:14px">↺ Refresh</button>
+    <div class="plist" id="ctx-list"><div class="empty">Connect a backend to scan processes</div></div>
+  </div>
+</div>
+
+<!-- ── History ── -->
+<div class="tp" id="tab-history">
+  <div class="card">
+    <h2>Session History</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Click any item to replay it.</p>
+    <button class="btn" onclick="clearHistory()" style="margin-bottom:12px">✕ Clear</button>
+    <div class="hlist" id="hist-list"><div class="empty">No history yet</div></div>
+  </div>
+</div>
+
+<!-- ── Docs ── -->
+<div class="tp" id="tab-docs">
+  <div class="card">
+    <h2>Documentation</h2>
+    <div class="dtabs">
+      <button class="dtab active" data-d="what">Overview</button>
+      <button class="dtab" data-d="eval">Evaluator</button>
+      <button class="dtab" data-d="alpha">Alpha</button>
+      <button class="dtab" data-d="ctx">Context</button>
+      <button class="dtab" data-d="api">API</button>
+    </div>
+
+    <div class="dsec active" id="doc-what">
+      <h4>What is Wolfram Cloud Studio?</h4>
+      <p>A self-contained browser UI for Wolfram Language computation and Wolfram|Alpha queries.
+         It works standalone (offline/demo) or connected to a live WL backend deployed on Wolfram Cloud.</p>
+      <h4>Getting started</h4>
+      <ul>
+        <li>Open this file in any browser — the UI is fully functional immediately</li>
+        <li>For live WL evaluation, deploy <code>wolfram_cloud_studio.wl</code> and paste the URL in Overview → Backend Connection</li>
+        <li>Theme toggle is in the top-right corner; preference is saved locally</li>
+        <li>All history is saved in <code>sessionStorage</code> and can be replayed</li>
+      </ul>
+    </div>
+
+    <div class="dsec" id="doc-eval">
+      <h4>Wolfram Language Evaluator</h4>
+      <p>Evaluates WL expressions via the connected backend. In demo mode, returns a mock response.</p>
+      <h4>Example expressions</h4>
+      <ul>
+        <li><code>Prime[1000]</code></li>
+        <li><code>Table[i^2, {i, 10}]</code></li>
+        <li><code>Solve[x^2 - 5x + 6 == 0, x]</code></li>
+        <li><code>FactorInteger[2^64 - 1]</code></li>
+        <li><code>StringJoin[Riffle[{"a","b","c"}, "-"]]</code></li>
+      </ul>
+      <h4>Keyboard shortcut</h4>
+      <p><code>Ctrl+Enter</code> / <code>Cmd+Enter</code> runs the current panel.</p>
+    </div>
+
+    <div class="dsec" id="doc-alpha">
+      <h4>Wolfram|Alpha Integration</h4>
+      <p>Sends natural-language queries to WolframAlpha via the backend. Works best for factual and scientific questions.</p>
+      <h4>Good queries</h4>
+      <ul>
+        <li>distance from Earth to Mars</li>
+        <li>population of Tokyo 2024</li>
+        <li>integral of sin(x)^2</li>
+        <li>100 USD in EUR</li>
+        <li>speed of light in furlongs per fortnight</li>
+      </ul>
+    </div>
+
+    <div class="dsec" id="doc-ctx">
+      <h4>Context Detection</h4>
+      <p>Runs <code>ps -ax</code> on the backend host and classifies processes by dev tool type
+         (Vite, FastAPI, Node, Jupyter, etc.).</p>
+      <h4>Detected process kinds</h4>
+      <ul>
+        <li>ViteFrontend · NextWebApp · WebpackFrontend</li>
+        <li>FastAPIService · FlaskService · DjangoService · JupyterService</li>
+        <li>NodeService · PythonService · WolframService · JavaService</li>
+        <li>ContainerRuntime · GenericProcess</li>
+      </ul>
+    </div>
+
+    <div class="dsec" id="doc-api">
+      <h4>REST API Reference</h4>
+      <p>All endpoints are on the deployed backend URL. All accept/return JSON.</p>
+      <h4>GET /api/status</h4>
+      <p>Version, deployment time, current config.</p>
+      <h4>POST /api/evaluate</h4>
+      <p>Body: <code>{"expression":"Prime[100]"}</code> → <code>{"result":"541"}</code></p>
+      <h4>POST /api/alpha</h4>
+      <p>Body: <code>{"query":"mass of sun"}</code> → <code>{"result":"1.989×10^30 kg"}</code></p>
+      <h4>GET /api/context</h4>
+      <p>Returns <code>{"processes":[...],"system":{...}}</code></p>
+      <h4>GET/POST /api/config</h4>
+      <p>Read or merge keys into <code>$AppConfig</code> without redeploying.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Settings ── -->
+<div class="tp" id="tab-settings">
+  <div class="card">
+    <h2>Settings</h2>
+
+    <div class="srow">
+      <div><div class="slbl">App Name</div><div class="sdesc">Shown in the header</div></div>
+      <input type="text" id="cfg-name" value="Wolfram Cloud Studio">
+    </div>
+
+    <div class="srow">
+      <div><div class="slbl">Max Output Characters</div><div class="sdesc">Truncation limit for evaluator results</div></div>
+      <input type="text" id="cfg-chars" value="4000">
+    </div>
+
+    <div class="srow">
+      <div><div class="slbl">Default Theme</div><div class="sdesc">Applied on next load</div></div>
+      <select id="cfg-theme" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+
+    <div class="srow">
+      <div><div class="slbl">Sync settings to backend</div><div class="sdesc">POST /api/config when saving (requires connection)</div></div>
+      <label class="toggle"><input type="checkbox" id="cfg-sync" checked><span class="ts"></span></label>
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <button class="btn p" onclick="saveSettings()">Save</button>
+      <span id="save-msg" style="font-size:12px;color:var(--ok)"></span>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+'use strict';
+
+/* ── Config ── */
+const cfg = {
+  backendUrl: localStorage.getItem('wcs-backend') || '',
+  theme: localStorage.getItem('wcs-theme') || 'dark',
+  appName: localStorage.getItem('wcs-name') || 'Wolfram Cloud Studio',
+  maxChars: parseInt(localStorage.getItem('wcs-chars')) || 4000,
+};
+
+let history = JSON.parse(sessionStorage.getItem('wcs-hist') || '[]');
+
+/* ── Theme ── */
+function applyTheme(t) {
+  cfg.theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').textContent = t === 'dark' ? '☀ Light' : '☾ Dark';
+  localStorage.setItem('wcs-theme', t);
+}
+document.getElementById('themeBtn').onclick = () => applyTheme(cfg.theme === 'dark' ? 'light' : 'dark');
+applyTheme(cfg.theme);
+
+/* ── Tab routing ── */
+function showTab(name) {
+  document.querySelectorAll('.tp').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.toggle('active', b.dataset.t === name));
+  const panel = document.getElementById('tab-' + name);
+  if (panel) panel.classList.add('active');
+  if (name === 'overview')  renderOverview();
+  if (name === 'context')   loadContext();
+  if (name === 'history')   renderHistory();
+  if (name === 'settings')  loadSettings();
+  if (name === 'docs')      showDoc('what');
+}
+document.querySelectorAll('.nb').forEach(b => b.onclick = () => showTab(b.dataset.t));
+
+/* ── Overview ── */
+function renderOverview() {
+  const url = document.getElementById('backend-url');
+  if (url) url.value = cfg.backendUrl;
+  updateConnDot(false);
+  if (cfg.backendUrl) pingBackend();
+
+  const stats = [
+    { lbl: 'App Name', val: cfg.appName },
+    { lbl: 'Theme', val: cfg.theme },
+    { lbl: 'Backend', val: cfg.backendUrl ? 'configured' : 'none' },
+    { lbl: 'History Items', val: history.length },
+    { lbl: 'Mode', val: cfg.backendUrl ? 'live' : 'offline' },
+    { lbl: 'Opened', val: new Date().toLocaleTimeString() },
+  ];
+  document.getElementById('stat-grid').innerHTML = stats.map(s =>
+    `<div class="stat"><div class="lbl">${s.lbl}</div><div class="val">${s.val}</div></div>`
+  ).join('');
+}
+
+function updateConnDot(online) {
+  const dot = document.getElementById('conn-dot');
+  const lbl = document.getElementById('conn-status');
+  if (dot) dot.className = 'dot' + (online ? ' online' : '');
+  if (lbl) lbl.textContent = online ? 'Connected' : (cfg.backendUrl ? 'Unreachable' : 'Not connected');
+}
+
+async function pingBackend() {
+  if (!cfg.backendUrl) return;
+  try {
+    const r = await fetch(cfg.backendUrl + '/api/status', { signal: AbortSignal.timeout(4000) });
+    updateConnDot(r.ok);
+  } catch { updateConnDot(false); }
+}
+
+function connectBackend() {
+  const val = document.getElementById('backend-url').value.trim().replace(/\/$/, '');
+  cfg.backendUrl = val;
+  localStorage.setItem('wcs-backend', val);
+  pingBackend();
+  renderOverview();
+}
+
+/* ── API helper ── */
+async function api(path, body) {
+  if (!cfg.backendUrl) return { error: 'No backend connected. Paste your Wolfram Cloud URL in Overview → Backend Connection.' };
+  try {
+    const opts = body
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(15000) }
+      : { signal: AbortSignal.timeout(8000) };
+    const r = await fetch(cfg.backendUrl + '/' + path, opts);
+    return await r.json();
+  } catch (e) { return { error: String(e) }; }
+}
+
+function setOut(id, text, cls) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'out ' + (cls || '');
+}
+
+/* ── Evaluate ── */
+async function runEval() {
+  const expr = document.getElementById('eval-input').value.trim();
+  if (!expr) return;
+  addHistory('WL', expr);
+  setOut('eval-out', '⟳ evaluating…', '');
+  const r = await api('api/evaluate', { expression: expr });
+  if (r.error) setOut('eval-out', r.error, 'err');
+  else setOut('eval-out', r.result ?? JSON.stringify(r, null, 2), 'ok');
+}
+
+/* ── Alpha ── */
+async function runAlpha() {
+  const q = document.getElementById('alpha-input').value.trim();
+  if (!q) return;
+  addHistory('Alpha', q);
+  setOut('alpha-out', '⟳ querying Wolfram|Alpha…', '');
+  const r = await api('api/alpha', { query: q });
+  if (r.error) setOut('alpha-out', r.error, 'err');
+  else setOut('alpha-out', r.result ?? 'No result', 'ok');
+}
+
+/* ── Context ── */
+async function loadContext() {
+  const list = document.getElementById('ctx-list');
+  list.innerHTML = '<div class="empty">⟳ scanning…</div>';
+  const r = await api('api/context');
+  if (r.error) { list.innerHTML = `<div class="empty">${r.error}</div>`; return; }
+  const procs = r.processes || [];
+  if (!procs.length) { list.innerHTML = '<div class="empty">No development processes detected</div>'; return; }
+  list.innerHTML = procs.map(p => `
+    <div class="pi">
+      <span class="pid">${p.pid ?? '—'}</span>
+      <span class="kbadge">${p.kind ?? 'Process'}</span>
+      <span class="cmd">${(p.args || p.command || '').slice(0, 80)}</span>
+    </div>`).join('');
+}
+
+/* ── History ── */
+function addHistory(type, expr) {
+  history.unshift({ type, expr, ts: new Date().toISOString() });
+  if (history.length > 50) history.pop();
+  sessionStorage.setItem('wcs-hist', JSON.stringify(history));
+}
+
+function renderHistory() {
+  const el = document.getElementById('hist-list');
+  if (!history.length) { el.innerHTML = '<div class="empty">No history yet</div>'; return; }
+  el.innerHTML = history.map((h, i) => `
+    <div class="hi" onclick="replay(${i})">
+      <span class="ht">${h.type}</span>
+      <span class="hx">${h.expr.slice(0, 80)}</span>
+    </div>`).join('');
+}
+
+function replay(i) {
+  const h = history[i];
+  if (h.type === 'WL') {
+    showTab('evaluate');
+    document.getElementById('eval-input').value = h.expr;
+    runEval();
+  } else {
+    showTab('alpha');
+    document.getElementById('alpha-input').value = h.expr;
+    runAlpha();
+  }
+}
+
+function clearHistory() {
+  history = [];
+  sessionStorage.removeItem('wcs-hist');
+  renderHistory();
+}
+
+/* ── Docs ── */
+function showDoc(id) {
+  document.querySelectorAll('.dsec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.dtab').forEach(t => t.classList.toggle('active', t.dataset.d === id));
+  const s = document.getElementById('doc-' + id);
+  if (s) s.classList.add('active');
+}
+document.querySelectorAll('.dtab').forEach(t => t.onclick = () => showDoc(t.dataset.d));
+
+/* ── Settings ── */
+function loadSettings() {
+  document.getElementById('cfg-name').value = cfg.appName;
+  document.getElementById('cfg-chars').value = cfg.maxChars;
+  document.getElementById('cfg-theme').value = cfg.theme;
+}
+
+async function saveSettings() {
+  cfg.appName = document.getElementById('cfg-name').value || 'Wolfram Cloud Studio';
+  cfg.maxChars = parseInt(document.getElementById('cfg-chars').value) || 4000;
+  const newTheme = document.getElementById('cfg-theme').value;
+  localStorage.setItem('wcs-name', cfg.appName);
+  localStorage.setItem('wcs-chars', cfg.maxChars);
+  applyTheme(newTheme);
+
+  if (document.getElementById('cfg-sync').checked && cfg.backendUrl) {
+    await api('api/config', { AppName: cfg.appName, MaxOutputChars: cfg.maxChars });
+  }
+
+  const msg = document.getElementById('save-msg');
+  msg.textContent = 'Saved!';
+  setTimeout(() => { msg.textContent = ''; }, 2000);
+}
+
+/* ── Keyboard ── */
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || e.key !== 'Enter') return;
+  const active = document.querySelector('.nb.active')?.dataset.t;
+  if (active === 'evaluate') runEval();
+  if (active === 'alpha')    runAlpha();
+});
+
+/* ── Init ── */
+renderOverview();
+</script>
+</body>
+</html>
