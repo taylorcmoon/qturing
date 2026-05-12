@@ -4,7 +4,7 @@
 association literal ready for use in a Wolfram notebook or WolframCloud deployment.
 
 Author:  Taylor Moon <taylorcmoon>
-License: MIT
+License: Proprietary — All Rights Reserved
 """
 from __future__ import annotations
 

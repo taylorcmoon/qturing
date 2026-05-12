@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cloud-automata-lab"
 version = "0.1.0"
-description = "Design Turing machines and model computational systems with a WolframCl   3ud-style backend."
+description = "Design Turing machines and model computational systems with a WolframCloud backend."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "Proprietary" }
 authors = [{ name = "Taylor Moon" }]
 keywords = ["turing", "automata", "wolfram", "wolframcloud", "computation"]
 classifiers = [
@@ -18,8 +18,16 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
 
+dependencies = [
+    "wolframclient>=1.1.7",
+    "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
 [project.urls]
 Source = "https://github.com/taylorcmoon/Quasilink"
 
-[tool.setuptools.packages.find]                             
+[tool.setuptools.packages.find]
 include = ["cloud_automata_lab*"]

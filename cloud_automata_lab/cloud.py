@@ -1,18 +1,16 @@
-"""cloud.py — WolframCloud HTTP client with mock mode.
+"""cloud.py — WolframCloud client with mock mode.
 
-``execute()`` sends a ``CloudRequest`` to a WolframCloud endpoint and returns
-a ``CloudResponse``. Set ``CloudSettings.mode`` to ``"mock"`` during
-development to get realistic stub responses without a live endpoint.
+``execute()`` sends a ``CloudRequest`` to WolframCloud and returns a
+``CloudResponse``. Uses the official ``wolframclient`` library in live mode.
+Set ``CloudSettings.mode`` to ``"mock"`` during development to get realistic
+stub responses without credentials.
 
 Author:  Taylor Moon <taylorcmoon>
-License: MIT
+License: Proprietary — All Rights Reserved
 """
 from __future__ import annotations
 
-import json
 import time
-import urllib.error
-import urllib.request
 from datetime import datetime, timezone
 
 from .types import CloudRequest, CloudResponse, CloudSettings
@@ -25,7 +23,11 @@ def execute(
     timeout: float = 30.0,
     mock_delay: float = 0.0,
 ) -> CloudResponse:
-    """Send a request to a WolframCloud endpoint, or return a mock result."""
+    """Send a request to WolframCloud, or return a mock result.
+
+    In live mode, authenticates via ``wolfram_id`` / ``wolfram_password`` on
+    ``CloudSettings`` using the official ``wolframclient`` library.
+    """
     if settings.mode == "mock":
         if mock_delay > 0:
             time.sleep(mock_delay)
@@ -35,58 +37,54 @@ def execute(
             executed_at=_now(),
         )
 
-    if not settings.endpoint_url.strip():
+    return _execute_live(settings, request, timeout=timeout)
+
+
+def _execute_live(
+    settings: CloudSettings,
+    request: CloudRequest,
+    *,
+    timeout: float,
+) -> CloudResponse:
+    try:
+        from wolframclient.evaluation import WolframCloudSession
+        from wolframclient.language import wlexpr
+    except ImportError:
         return CloudResponse(
             ok=False,
             result="",
-            error="Missing WolframCloud endpoint URL.",
+            error="wolframclient is not installed. Run: pip install wolframclient",
             executed_at=_now(),
         )
 
-    payload = json.dumps(
-        {"code": request.code, "parameters": request.parameters or {}}
-    ).encode("utf-8")
-    headers = {"Content-Type": "application/json"}
-    if settings.api_key:
-        headers["Authorization"] = f"Bearer {settings.api_key}"
-
-    req = urllib.request.Request(
-        settings.endpoint_url, data=payload, headers=headers, method="POST"
-    )
-
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            text = resp.read().decode("utf-8", errors="replace")
-            status = resp.status
-    except urllib.error.HTTPError as exc:
-        text = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
-        status = exc.code
-    except urllib.error.URLError as exc:
+    if not settings.wolfram_id or not settings.wolfram_password:
         return CloudResponse(
             ok=False,
             result="",
-            error=str(exc.reason),
+            error="Set wolfram_id and wolfram_password on CloudSettings to use live mode.",
             executed_at=_now(),
         )
 
     try:
-        raw: object = json.loads(text)
-    except ValueError:
-        raw = text
-
-    if isinstance(raw, dict) and "result" in raw:
-        result_text = str(raw["result"])
-    else:
-        result_text = text
-
-    ok = 200 <= status < 300
-    return CloudResponse(
-        ok=ok,
-        result=result_text if ok else "",
-        raw=raw,
-        error=None if ok else f"HTTP {status}",
-        executed_at=_now(),
-    )
+        session = WolframCloudSession(
+            credentials=(settings.wolfram_id, settings.wolfram_password)
+        )
+        session.start()
+        result = session.evaluate(wlexpr(request.code))
+        session.stop()
+        return CloudResponse(
+            ok=True,
+            result=str(result),
+            raw=result,
+            executed_at=_now(),
+        )
+    except Exception as exc:
+        return CloudResponse(
+            ok=False,
+            result="",
+            error=str(exc),
+            executed_at=_now(),
+        )
 
 
 def _mock_result(code: str) -> str:

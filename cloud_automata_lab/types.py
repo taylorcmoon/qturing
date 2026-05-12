@@ -2,12 +2,13 @@
 
 Defines the full type hierarchy used across the package:
 - Turing machine specs (``TuringMachineSpec``, ``Transition``, ``TapeSnapshot``)
+- Quantum Turing machine specs (``QTransition``, ``QTuringMachineSpec``, ``Wavefunction``)
 - Cloud client types (``CloudSettings``, ``CloudRequest``, ``CloudResponse``)
 - Cellular automaton configs and results (1D and 2D)
 - Wolfram expression and export types
 
 Author:  Taylor Moon <taylorcmoon>
-License: MIT
+License: Proprietary — All Rights Reserved
 """
 from __future__ import annotations
 
@@ -78,6 +79,79 @@ class SimulationOutcome:
 
 
 # ---------------------------------------------------------------------------
+# Quantum Turing machine
+# ---------------------------------------------------------------------------
+
+# A basis configuration: (internal_state, tape_cells, head_position)
+Configuration = tuple[str, tuple[str, ...], int]
+
+# The wavefunction: a superposition of configurations with complex amplitudes.
+# |ψ⟩ = Σ αᵢ |qᵢ, tᵢ, hᵢ⟩   where Σ|αᵢ|² = 1 (after normalisation)
+Wavefunction = dict[Configuration, complex]
+
+
+@dataclass(frozen=True)
+class QTransition:
+    """One branch of a quantum transition.
+
+    A single (state, read) pair may have multiple QTransitions — each with its
+    own complex amplitude.  The set of amplitudes for a given (state, symbol)
+    must be unitary (squared magnitudes sum to 1) to preserve the norm.
+    """
+    id: str
+    state: str
+    read: str
+    amplitude: complex
+    write: str
+    move: Move
+    next_state: str
+
+
+@dataclass
+class QTuringMachineSpec:
+    """Quantum Turing machine — like TuringMachineSpec but with QTransitions."""
+    name: str
+    alphabet: list[str]
+    blank_symbol: str
+    start_state: str
+    accept_state: str
+    reject_state: str
+    input_tape: str
+    transitions: list[QTransition]
+
+
+@dataclass(frozen=True)
+class QSimulationStep:
+    """A snapshot of the wavefunction at one simulation step."""
+    step: int
+    wavefunction: Wavefunction
+
+    def probabilities(self) -> dict[Configuration, float]:
+        return {cfg: abs(a) ** 2 for cfg, a in self.wavefunction.items()}
+
+
+@dataclass
+class QMeasurementOutcome:
+    """One possible classical outcome after measuring the wavefunction."""
+    result: SimResult
+    final_tape: str
+    probability: float
+
+
+@dataclass
+class QSimulationOutcome:
+    """Full result of a quantum Turing machine run."""
+    result: SimResult          # most-probable outcome
+    final_tape: str
+    steps: int
+    history: list[QSimulationStep]
+    measurement_outcomes: list[QMeasurementOutcome]
+
+    def dominant_probability(self) -> float:
+        return self.measurement_outcomes[0].probability if self.measurement_outcomes else 0.0
+
+
+# ---------------------------------------------------------------------------
 # Cloud
 # ---------------------------------------------------------------------------
 
@@ -86,6 +160,8 @@ class CloudSettings:
     endpoint_url: str = ""
     api_key: str = ""
     mode: ExecutionMode = "mock"
+    wolfram_id: str = ""
+    wolfram_password: str = ""
 
 
 @dataclass

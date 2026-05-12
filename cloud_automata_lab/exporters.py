@@ -6,7 +6,7 @@ self-contained, runnable program in the target language.
 Supported targets: ``wolfram``, ``python``, ``javascript``, ``go``, ``c``.
 
 Author:  Taylor Moon <taylorcmoon>
-License: MIT
+License: Proprietary — All Rights Reserved
 """
 from __future__ import annotations
 

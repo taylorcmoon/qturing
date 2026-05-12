@@ -5,7 +5,7 @@ iteration. Both mirror the semantics of the exported multi-language runners
 so local results are directly comparable to code produced by ``exporters``.
 
 Author:  Taylor Moon <taylorcmoon>
-License: MIT
+License: Proprietary — All Rights Reserved
 """
 from __future__ import annotations
 

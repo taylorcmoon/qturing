@@ -6,7 +6,7 @@ Exports:
 - ``MODELING_PRESETS`` — categorised research starting points
 
 Author:  Taylor Moon <taylorcmoon>
-License: MIT
+License: Proprietary — All Rights Reserved
 """
 from __future__ import annotations
 
